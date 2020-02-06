@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+
+#__________________________________________________________________
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import proj3d
 from mpl_toolkits.mplot3d import Axes3D
@@ -10,7 +13,30 @@ from numpy import linalg as LA
 import math
 import random
 
+#__________________________________________________________________
+ 
+''' INTRODUCTION '''
+##################################################################
+'''
+INTRODUCTION: This script was part of the Ph.D. project where we
+constructed MOFs consisting of Metallic (Fe, Ru, Cu) ions coordinated 
+with bipyridine molecules. This technical construction consists of 
+first creating the main unit fully optimized with DFT in the gas phase 
+and getting the corresponding NBO or Mulliken charges. The next phase 
+is to repeat this unit in all three directions with the same corresponding 
+charges of the main unit. Overall, this is the assumption where we have
+assumed that the system is homogenous, the electrostatic field is the same 
+everywhere. Now, we have to fix the boundary points. This, however, is a 
+difficult problem because the truncated charges have to be taken into account. 
+This is explained in the thesis. 
+@
+https://hal.archives-ouvertes.fr/tel-02058650
+@
 
+'''
+##################################################################
+''' MAIN PROGRAM '''
+##################################################################
 def read_atom_locations(path,file,n0,n1,n2,n3,n4,n5,ax,f1):
     x,y,z = [], [], []
     xi,yi,zi = [], [], []
@@ -37,8 +63,7 @@ def read_atom_locations(path,file,n0,n1,n2,n3,n4,n5,ax,f1):
         ymi.append(words[2])
         zmi.append(words[3])   
     f.close()  
-    
-    
+        
     S0 = define_central_octa(xi,yi,zi,n0,n1,n2,n3,n4,n5)        
     
     #Rotate into conveniant orientation : (at_3-at_4 axis) = (001)
