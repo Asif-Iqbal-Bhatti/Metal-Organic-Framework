@@ -41,42 +41,38 @@ def read_atom_locations(path,file,n0,n1,n2,n3,n4,n5,ax,f1):
     x,y,z = [], [], []
     xi,yi,zi = [], [], []
     label = []
-    f=open(path+file,"r")
-    data = f.readlines()
-    for line in data:
-        words=line.split()
-        label.append(words[0])
-        xi.append(words[1])
-        yi.append(words[2])
-        zi.append(words[3])   
-    f.close()
-
+    with open(path+file,"r") as f:
+        data = f.readlines()
+        for line in data:
+            words=line.split()
+            label.append(words[0])
+            xi.append(words[1])
+            yi.append(words[2])
+            zi.append(words[3])
     xmi,ymi,zmi = [], [], []
     xm,ym,zm = [], [], []
     labelm = []
-    f=open(path+"methyl.xyz","r")
-    data = f.readlines()
-    for line in data:
-        words=line.split()
-        labelm.append(words[0])
-        xmi.append(words[1])
-        ymi.append(words[2])
-        zmi.append(words[3])   
-    f.close()  
-        
+    with open(f"{path}methyl.xyz", "r") as f:
+        data = f.readlines()
+        for line in data:
+            words=line.split()
+            labelm.append(words[0])
+            xmi.append(words[1])
+            ymi.append(words[2])
+            zmi.append(words[3])
     S0 = define_central_octa(xi,yi,zi,n0,n1,n2,n3,n4,n5)        
-    
+
     #Rotate into conveniant orientation : (at_3-at_4 axis) = (001)
     ux =  float(S0[3][0]) - float(S0[4][0])
-    uy =  float(S0[3][1]) - float(S0[4][1])     
+    uy =  float(S0[3][1]) - float(S0[4][1])
     uz =  float(S0[3][2]) - float(S0[4][2])
     norm = np.sqrt(ux*ux + uy *uy +uz*uz)
     ux=ux/norm
     uy=uy/norm
     uz=uz/norm
-    
+
     G = barycenter(S0)
-    
+
     xinit = [0,0,0]
     opt = simplex(func3, xinit, args=(0, 0, 1, ux, uy, uz), full_output=0)
     # Rotate & move the atoms of the residu without any terminating CH3 fragments
@@ -86,18 +82,16 @@ def read_atom_locations(path,file,n0,n1,n2,n3,n4,n5,ax,f1):
         x.append( vect2[0])
         y.append( vect2[1])
         z.append( vect2[2]) 
- 
+
 
     for i in range(54):
         ax.scatter(float(x[i]),float(y[i]),float(z[i]), c='blue', s=30)
-    
-    f=open("./"+"monomer_0.xyz","w")
-    for i in range(len(x)):
-        line = label[i]+" "+str(float(x[i]))+" "+str(float(y[i]))+" "+str(float(z[i]))+"\n"
-        f1.write(line)
-        f.write(line)
-    f.close()
-    
+
+    with open("./"+"monomer_0.xyz","w") as f:
+        for i in range(len(x)):
+            line = f"{label[i]} {float(x[i])} {float(y[i])} {float(z[i])}" + "\n"
+            f1.write(line)
+            f.write(line)
     # Operate the same displacement for the terminating CH3 fragments
     for i in range(len(xmi)):
         vect1=[[float(xmi[i])-float(G[0])],[float(ymi[i])-float(G[1])],[float(zmi[i])-float(G[2])]]
@@ -105,25 +99,24 @@ def read_atom_locations(path,file,n0,n1,n2,n3,n4,n5,ax,f1):
         xm.append( vect2[0])
         ym.append( vect2[1])
         zm.append( vect2[2]) 
-    
+
     # Do the same for the central octahedra    
-    S=[]  
+    S=[]
     S = define_central_octa(x,y,z,n0,n1,n2,n3,n4,n5)  
-        
+
     return S, label,x,y,z,labelm,xm,ym,zm
 
 def read_atom_locations2(path,file):
     x,y,z = [], [], []
     label = []
-    f=open(path+file,"r")
-    data = f.readlines()
-    for line in data:
-        words=line.split()
-        label.append(words[0])
-        x.append(words[1])
-        y.append(words[2])
-        z.append(words[3])   
-    f.close()
+    with open(path+file,"r") as f:
+        data = f.readlines()
+        for line in data:
+            words=line.split()
+            label.append(words[0])
+            x.append(words[1])
+            y.append(words[2])
+            z.append(words[3])
     return label,x,y,z
 
 
@@ -131,52 +124,39 @@ def define_central_octa(x,y,z,n0,n1,n2,n3,n4,n5):
     A = [float(x[n0])  ,  float(y[n0])   ,   float(z[n0])]
     B = [float(x[n1])  ,  float(y[n1])   ,   float(z[n1])]
     C = [float(x[n2])  ,  float(y[n2])   ,   float(z[n2])]
-    D = [float(x[n3])  ,  float(y[n3])   ,   float(z[n3])]  
+    D = [float(x[n3])  ,  float(y[n3])   ,   float(z[n3])]
     E = [float(x[n4])  ,  float(y[n4])   ,   float(z[n4])]
-    F = [float(x[n5])  ,  float(y[n5])   ,   float(z[n5])]    
-    S = []
-    S.append(B)
-    S.append(A)
-    S.append(C)
-    S.append(D)
-    S.append(E)
-    S.append(F)
+    F = [float(x[n5])  ,  float(y[n5])   ,   float(z[n5])]
 #    G = barycenter(S)
 #    for i in range(6):
 #        for j in range(3):
 #            S[i][j] = S[i][j]-G[j]
-    return S
+    return [B, A, C, D, E, F]
 
 
 
 def change_name(S0,S1_1,S1_2,S1_3,S1_4,S1_5,S1_6,S2_2, \
                 S2_3,S2_5,S2_6,S3_2,S3_3,S3_5,S3_6):
-    O = []
-    O.append(S0)
-    O.append(S1_1)
-    O.append(S1_2)
-    O.append(S1_3)
-    O.append(S1_4)
-    O.append(S1_5)
-    O.append(S1_6)
-    O.append(S2_2)
-    O.append(S2_3)
-    O.append(S2_5)
-    O.append(S2_6)
-    O.append(S3_2)
-    O.append(S3_3)
-    O.append(S3_5)
-    O.append(S3_6)
-    return O
+    return [
+        S0,
+        S1_1,
+        S1_2,
+        S1_3,
+        S1_4,
+        S1_5,
+        S1_6,
+        S2_2,
+        S2_3,
+        S2_5,
+        S2_6,
+        S3_2,
+        S3_3,
+        S3_5,
+        S3_6,
+    ]
 
 def change_name2(S0,S1_2,S1_3,S1_5,S1_6):
-    O = []
-    O.append(S0)
-    O.append(S1_2)
-    O.append(S1_3)
-    O.append(S1_5)
-    O.append(S1_6)
-    return O
+    return [S0, S1_2, S1_3, S1_5, S1_6]
 
 
 def new_monomer(S,n1,n2,R,ax):    
@@ -185,10 +165,10 @@ def new_monomer(S,n1,n2,R,ax):
     S2 = []
     for j in range(len(S)):
         S2.append([])
-        for i in range(3):
+        for _ in range(3):
             S2[j].append(0.0)
     #print(S2)
-    
+
     dx = (S[n1][0]-S[n2][0])
     dy = (S[n1][1]-S[n2][1])
     dz = (S[n1][2]-S[n2][2])
@@ -200,7 +180,7 @@ def new_monomer(S,n1,n2,R,ax):
     ux =   (S[n1][0]-S[n2][0])  + dx*R
     uy =   (S[n1][1]-S[n2][1])  + dy*R
     uz =   (S[n1][2]-S[n2][2]) +  dz*R    
-    
+
     for j in range(len(S)):
         S2[j][0] =S[j][0] + ux
         S2[j][1] =S[j][1] + uy
@@ -208,7 +188,7 @@ def new_monomer(S,n1,n2,R,ax):
     #print(S2)    
     a = Arrow3D([S2[n2][0], S[n1][0]],[S2[n2][1], S[n1][1]], [S2[n2][2], S[n1][2]], mutation_scale=20,
             lw=3, arrowstyle="-", color="r")
-    ax.add_artist(a)    
+    ax.add_artist(a)
     return S2
 
 
@@ -219,7 +199,7 @@ def new_monomer_top(S,n1,n2,R,ax):
     dz = (S[n2][2]-S[n1][2])
     for j in range(len(S)):
         S2.append([])
-        for i in range(3):
+        for _ in range(3):
             S2[j].append(0.0)
     for j in range(len(S)):
         S2[j][0] =S[j][0] 
@@ -239,7 +219,7 @@ def new_monomer_bottom(S,n1,n2,R,ax):
     dz = (S[n2][2]-S[n1][2])
     for j in range(len(S)):
         S2.append([])
-        for i in range(3):
+        for _ in range(3):
             S2[j].append(0.0)
     for j in range(len(S)):
         S2[j][0] =S[j][0] 
@@ -284,23 +264,20 @@ def rotation(alpha1,beta1,gamma1):
     #gamma1 = 0.0
     R1x=np.matrix([[1,0,0],[0,np.cos(alpha1),-np.sin(alpha1)],[0,np.sin(alpha1),np.cos(alpha1)]])
     R1y=np.matrix([[np.cos(beta1),0,np.sin(beta1)],[0,1,0],[-np.sin(beta1),0, np.cos(beta1)]])
-    R1z=np.matrix([[np.cos(gamma1),-np.sin(gamma1),0],[np.sin(gamma1),np.cos(gamma1),0],[0,0,1]])  
-    R1=R1x*R1y*R1z    
-    return R1
+    R1z=np.matrix([[np.cos(gamma1),-np.sin(gamma1),0],[np.sin(gamma1),np.cos(gamma1),0],[0,0,1]])
+    return R1x*R1y*R1z
 
 def rotation2(alpha1,beta1,gamma1):
     R1x=np.matrix([[1,0,0],[0,np.cos(alpha1),-np.sin(alpha1)],[0,np.sin(alpha1),np.cos(alpha1)]])
     R1y=np.matrix([[np.cos(beta1),0,np.sin(beta1)],[0,1,0],[-np.sin(beta1),0, np.cos(beta1)]])
-    R1z=np.matrix([[np.cos(gamma1),-np.sin(gamma1),0],[np.sin(gamma1),np.cos(gamma1),0],[0,0,1]])  
-    R1=R1x*R1y*R1z    
-    return R1
+    R1z=np.matrix([[np.cos(gamma1),-np.sin(gamma1),0],[np.sin(gamma1),np.cos(gamma1),0],[0,0,1]])
+    return R1x*R1y*R1z
 
 def barycenter(S):
     x = float(S[0][0])+float(S[1][0])+float(S[2][0])+float(S[3][0])+float(S[4][0])+float(S[5][0])
     y = float(S[0][1])+float(S[1][1])+float(S[2][1])+float(S[3][1])+float(S[4][1])+float(S[5][1])
     z = float(S[0][2])+float(S[1][2])+float(S[2][2])+float(S[3][2])+float(S[4][2])+float(S[5][2])
-    G =  np.array([[x/6],[y/6],[z/6]])
-    return G
+    return np.array([[x/6],[y/6],[z/6]])
 
 
 def move(Sub,n,m,alpha,beta,gamma):
@@ -334,8 +311,7 @@ def func(params, Sub1,n1,n2,Sub2,n3,n4,R):
     
 def get_rotation_angles(Sub1,n1,n2,Sub2,n3,n4,R):
     x0 = [0,0,0,0,0,0]
-    opt = simplex(func, x0, args=(Sub1,n1,n2,Sub2,n3,n4,R), full_output=0)    
-    return opt
+    return simplex(func, x0, args=(Sub1,n1,n2,Sub2,n3,n4,R), full_output=0)
 
 def apply_new_locations(S0,opt,Sub1,n1,n2,Sub2,n3,n4, Natom, label0, x0, y0, z0,xm,ym,zm,ax,f1,icompt):
     for i in range(6):
@@ -347,7 +323,7 @@ def apply_new_locations(S0,opt,Sub1,n1,n2,Sub2,n3,n4, Natom, label0, x0, y0, z0,
         if i != n3 :
             for j in range(3):
                 Sub2[i][j] = float(v[j])
-            
+
     u = move(Sub1,n1,n1,opt[0],opt[1],opt[2])
     v = move(Sub2,n3,n3,opt[3],opt[4],-opt[2])
     #print(Sub1[1])
@@ -355,30 +331,30 @@ def apply_new_locations(S0,opt,Sub1,n1,n2,Sub2,n3,n4, Natom, label0, x0, y0, z0,
         Sub1[n1][j] = float(u[j])    
         Sub2[n3][j] = float(v[j])
     #print(Sub1[n1])
-    
+
     #Move the atoms at the same time.
     label,x,y,z,xm,ym,zm = Move_Rotate_octahedra2(S0,Sub1, opt[0],opt[1],opt[2], Natom, label0, x0, y0, z0,xm,ym,zm)
     for i in range(54):
-        ax.scatter(float(x[i]),float(y[i]),float(z[i]), c='blue', s=30)    
+        ax.scatter(float(x[i]),float(y[i]),float(z[i]), c='blue', s=30)
     if icompt ==0 : f=open("./"+"monomer_3.xyz","w")
-    if icompt ==1 : f=open("./"+"monomer_4.xyz","w")    
+    if icompt ==1 : f=open("./"+"monomer_4.xyz","w")
     for i in range(len(x)):
-        line = label[i]+" "+str(float(x[i]))+" "+str(float(y[i]))+" "+str(float(z[i]))+"\n"
+        line = f"{label[i]} {float(x[i])} {float(y[i])} {float(z[i])}" + "\n"
         f1.write(line)
         f.write(line)
     f.close()
-        
+
     label,x,y,z,xm,ym,zm = Move_Rotate_octahedra2(S0,Sub2, opt[3],opt[4],-opt[2], Natom, label0, x0, y0, z0,xm,ym,zm)
     for i in range(54):
         ax.scatter(float(x[i]),float(y[i]),float(z[i]), c='blue', s=30)
-    if icompt==0 : f=open("./"+"monomer_1.xyz","w")   
-    if icompt==1 : f=open("./"+"monomer_2.xyz","w") 
+    if icompt==0 : f=open("./"+"monomer_1.xyz","w")
+    if icompt==1 : f=open("./"+"monomer_2.xyz","w")
     for i in range(len(x)):
-        line = label[i]+" "+str(float(x[i]))+" "+str(float(y[i]))+" "+str(float(z[i]))+"\n"
+        line = f"{label[i]} {float(x[i])} {float(y[i])} {float(z[i])}" + "\n"
         f1.write(line)
         f.write(line)
     f.close()
-    
+
     return
 
 def Move_Rotate_octahedra2(S0,O, a1,a2,a3,Natom, label0, x0, y0, z0, xmi, ymi, zmi):
@@ -397,14 +373,14 @@ def Move_Rotate_octahedra2(S0,O, a1,a2,a3,Natom, label0, x0, y0, z0, xmi, ymi, z
         x.append(float(G1[0]) + vect2[0])
         y.append(float(G1[1]) + vect2[1])
         z.append(float(G1[2]) + vect2[2])
-        
+
     for k in range(len(xmi)):
         vect1=[[float(xmi[k])-xc],[float(ymi[k])-yc],[float(zmi[k])-zc]]
         vect2 = move2(a1,a2,a3,vect1)
         xm.append(float(G1[0]) + vect2[0])
         ym.append(float(G1[1]) + vect2[1])
         zm.append(float(G1[2]) + vect2[2])     
-        
+
     return label,x,y,z, xm,ym,zm
 
 
@@ -424,15 +400,15 @@ def plot_monomer_top(alf,S,R,ax,i0):
     y = S[0][1]+S[1][1]+S[2][1]+S[3][1]+S[4][1]+S[5][1]
     z = S[0][2]+S[1][2]+S[2][2]+S[3][2]+S[4][2]+S[5][2]
     G =  [x/6,y/6,z/6]
-    label = "S2_"+str(i0)
+    label = f"S2_{str(i0)}"
     #ax.text((x/6)+shift,(y/6)+shift,(z/6)+shift, label, size=23, zorder=1,  color='grey') 
-    
+
     col =  ['red','green','blue','violet','brown','black']
     ax.scatter(G[0], G[1],G[2], c='grey', s=30)
     for i in range(len(S)) :
         ax.scatter(S[i][0],S[i][1],S[i][2], c=col[i], s=30)
-        
-    
+
+
     a = Arrow3D([S[0][0], S[1][0]],[S[0][1], S[1][1]], [S[0][2], S[1][2]], mutation_scale=20,
             lw=1, arrowstyle="-", color="r")
     ax.add_artist(a)
@@ -469,7 +445,7 @@ def plot_monomer_top(alf,S,R,ax,i0):
     h4= Arrow3D([S[5][0], S[3][0]],[S[5][1], S[3][1]], [S[5][2], S[3][2]], mutation_scale=20,
             lw=1, arrowstyle="-", color="r")
     ax.add_artist(h4)
-    
+
     return
         
         
