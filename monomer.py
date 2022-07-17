@@ -450,23 +450,24 @@ def plot_monomer_top(alf,S,R,ax,i0):
         
         
 def plot_monomer(alf,S,R,ax,i0,i1):
-    shift = 1
     x = S[0][0]+S[1][0]+S[2][0]+S[3][0]+S[4][0]+S[5][0]
     y = S[0][1]+S[1][1]+S[2][1]+S[3][1]+S[4][1]+S[5][1]
     z = S[0][2]+S[1][2]+S[2][2]+S[3][2]+S[4][2]+S[5][2]
     G =  [x/6,y/6,z/6]
     if i0 == 0 : label = "S0"
-    if i0 !=0 : label = "S1_"+str(i0)
-    if i1 ==1 :
+    if i0 !=0:
+        label = f"S1_{str(i0)}"
+    if i1 ==1:
+        shift = 1
         ax.text((x/6)+shift,(y/6)+shift,(z/6)+shift, label, size=20, zorder=1,  color='red') 
-    
+
     col =  ['red','green','blue','violet','brown','black']
     ax.scatter(G[0], G[1],G[2], c='grey', s=30)
     for i in range(len(S)) :
         ax.scatter(S[i][0],S[i][1],S[i][2], c=col[i], s=30)
         if i1 == 1:
             ax.text(S[i][0],S[i][1],S[i][2], str(i), size=20, zorder=1,  color='black') 
-    
+
     a = Arrow3D([S[0][0], S[1][0]],[S[0][1], S[1][1]], [S[0][2], S[1][2]], mutation_scale=20,
             lw=1, arrowstyle="-", color="r")
     ax.add_artist(a)
@@ -515,23 +516,24 @@ def plot_monomer(alf,S,R,ax,i0,i1):
     return G
 
 def plot_monomer2(alf,S,R,ax,i0,i1,i2):
-    shift = 1
     x = S[0][0]+S[1][0]+S[2][0]+S[3][0]+S[4][0]+S[5][0]
     y = S[0][1]+S[1][1]+S[2][1]+S[3][1]+S[4][1]+S[5][1]
     z = S[0][2]+S[1][2]+S[2][2]+S[3][2]+S[4][2]+S[5][2]
     G =  [x/6,y/6,z/6]
     if i0 == 0 : label = "S0"
-    if i0 !=0 : label = "O_"+str(i2)
-    if i1 ==1 :
+    if i0 !=0:
+        label = f"O_{str(i2)}"
+    if i1 ==1:
+        shift = 1
         ax.text((x/6)+shift,(y/6)+shift,(z/6)+shift, label, size=20, zorder=1,  color='red') 
-    
+
     col =  ['red','green','blue','violet','brown','black']
     ax.scatter(G[0], G[1],G[2], c='grey', s=30)
     for i in range(len(S)) :
         ax.scatter(S[i][0],S[i][1],S[i][2], c=col[i], s=30)
         if i1 == 1:
             ax.text(S[i][0],S[i][1],S[i][2], str(i), size=20, zorder=1,  color='black') 
-    
+
     a = Arrow3D([S[0][0], S[1][0]],[S[0][1], S[1][1]], [S[0][2], S[1][2]], mutation_scale=20,
             lw=1, arrowstyle="-", color="r")
     ax.add_artist(a)
@@ -588,9 +590,9 @@ def search_chains_to_be_ploted(N,O,R):
     connect = []
     for k1 in range(N):
         connect.append([])
-        for i1 in range(6): 
+        for _ in range(6):
             connect[k1].append(0)
-    
+
     for k1 in range(N-1):
         for i1 in range(6): 
             for k2 in range(k1+1,N):
@@ -599,12 +601,10 @@ def search_chains_to_be_ploted(N,O,R):
                     dy2=(O[k1][i1][1]-O[k2][i2][1])**2
                     dz2=(O[k1][i1][2]-O[k2][i2][2])**2
                     dist = np.sqrt(dx2+dy2+dz2)
-                    if dist <= R+error :
-                        if dist >= R-error :
-                            P.append([k1,i1,k2,i2]) 
-                            connect[k1][i1] = 1
-                            connect[k2][i2] = 1
-                            #print(dist)
+                    if dist <= R + error and dist >= R - error:
+                        P.append([k1,i1,k2,i2])
+                        connect[k1][i1] = 1
+                        connect[k2][i2] = 1
     print(P)
     print(connect)
     return P, connect
@@ -628,13 +628,11 @@ def plot_chains(N,O,R,ax):
 
 def move2(alpha,beta,gamma, vect):
     Rot = rotation(alpha,beta,gamma)
-    u= Rot* vect
-    return u
+    return Rot* vect
 
 def move3(alpha,beta,gamma, vect):
     Rot = rotation2(alpha,beta,gamma)
-    u= Rot* vect
-    return u
+    return Rot* vect
 
 
 def func2(params, S0, O,x0,y0,z0,n1,n2,n3,n1p, n2p, n3p):
@@ -643,12 +641,12 @@ def func2(params, S0, O,x0,y0,z0,n1,n2,n3,n1p, n2p, n3p):
     alpha1= params[0]
     beta1 = params[1]
     gamma1 = params[2]
-    
+
     G0 = barycenter(S0)
     xc= float(G0[0])
     yc = float(G0[1])
     zc = float(G0[2])  
-    
+
     vect1=[[float(x0[n1p])-xc],[float(y0[n1p])-yc],[float(z0[n1p])-zc]]
     vect2=[[float(x0[n2p])-xc],[float(y0[n2p])-yc],[float(z0[n2p])-zc]]
     vect3=[[float(x0[n3p])-xc],[float(y0[n3p])-yc],[float(z0[n3p])-zc]]
@@ -658,21 +656,25 @@ def func2(params, S0, O,x0,y0,z0,n1,n2,n3,n1p, n2p, n3p):
     u2 = move2(alpha1,beta1,gamma1,vect2)   
     u3 = move2(alpha1,beta1,gamma1,vect3)    
     G2 = barycenter(O)
-    
+
     chi2 = (u1[0]- O[n1][0] + float(G2[0]))**2 +  (u1[1]- O[n1][1]+ float(G2[1]))**2 + \
             (u1[2]- O[n1][2]+ float(G2[2]))**2 + \
            (u2[0]- O[n2][0] + float(G2[0]))**2 +  (u2[1]- O[n2][1]+ float(G2[1]))**2 + \
             (u2[2]- O[n2][2]+ float(G2[2]))**2 + \
            (u3[0]- O[n3][0] + float(G2[0]))**2 +  (u3[1]- O[n3][1]+ float(G2[1]))**2 + \
             (u3[2]- O[n3][2]+ float(G2[2]))**2   
-    
+
     return chi2
 
 
 def orientate_octahedra(S0, O, x0, y0, z0,n1, n2, n3, n1p, n2p, n3p):
     xinit = [0,0,0,0,0,0]
-    opt = simplex(func2, xinit, args=(S0,O,x0,y0,z0,n1,n2,n3,n1p, n2p, n3p), full_output=0)    
-    return opt
+    return simplex(
+        func2,
+        xinit,
+        args=(S0, O, x0, y0, z0, n1, n2, n3, n1p, n2p, n3p),
+        full_output=0,
+    )
 
 
 def Move_Rotate_octahedra(S0, O, Natom, label0, x0, y0, z0, xmi, ymi, zmi, n1, n2, n3, n1p, n2p, n3p):
@@ -692,14 +694,14 @@ def Move_Rotate_octahedra(S0, O, Natom, label0, x0, y0, z0, xmi, ymi, zmi, n1, n
         x.append(float(G1[0]) + vect2[0])
         y.append(float(G1[1]) + vect2[1])
         z.append(float(G1[2]) + vect2[2])
-        
+
     for k in range(len(xmi)):
         vect1=[[float(xmi[k])-xc],[float(ymi[k])-yc],[float(zmi[k])-zc]]
         vect2 = move2(opt[0],opt[1],opt[2],vect1)
         xm.append(float(G1[0]) + vect2[0])
         ym.append(float(G1[1]) + vect2[1])
         zm.append(float(G1[2]) + vect2[2])     
-        
+
     return label,x,y,z, xm,ym,zm
 
 
@@ -718,8 +720,7 @@ def func3(params, xo, yo, zo, xab, yab, zab):
 
 def turn_alkyl(xo, yo, zo, xab, yab, zab):
     xinit = [0,0,0]
-    opt = simplex(func3, xinit, args=(xo, yo, zo, xab, yab, zab), full_output=0)
-    return opt
+    return simplex(func3, xinit, args=(xo, yo, zo, xab, yab, zab), full_output=0)
 
   
 def Move_Rotate_segments(O, P, Nalk, labela, xa, ya, za):
@@ -776,8 +777,12 @@ def func4(params, ux,uy,uz,x0,y0,z0,xc,yc,zc,lcc):
 
 def turn_methyl(ux,uy,uz,x0,y0,z0,xc,yc,zc,lcc):
     xinit = [0,0,0]
-    opt = simplex(func4, xinit, args=(ux,uy,uz,x0,y0,z0,xc,yc,zc,lcc), full_output=0)
-    return opt
+    return simplex(
+        func4,
+        xinit,
+        args=(ux, uy, uz, x0, y0, z0, xc, yc, zc, lcc),
+        full_output=0,
+    )
 
 def orientate_methyl(x0,y0,z0,xc,yc,zc,xm,ym,zm,i1,lcc):
     xs, ys, zs = [], [], []
